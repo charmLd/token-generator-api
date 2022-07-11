@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"context"
+	"github.com/charmLd/token-generator-api/domain/boundary/repositories"
 
 	"fmt"
 
@@ -18,7 +19,7 @@ type UserRepository struct {
 	Location    *time.Location
 }
 
-func NewUserRepository(dbAdapter adapters.DBAdapterInterface, loc *time.Location) *UserRepository {
+func NewUserRepository(dbAdapter adapters.DBAdapterInterface, loc *time.Location) repositories.UserRepositoryInterface {
 
 	return &UserRepository{
 		DBAdapter: dbAdapter,
@@ -40,7 +41,6 @@ func (usr *UserRepository) UpdateLastLogin(ctx context.Context, userID string) (
 		log.Error(ctx, err, "preparing last login query failed")
 		return
 	}
-	fmt.Println("login valuee: ", time.Now().In(usr.Location).Format("2006-01-02 15:04:05"))
 	result, err := statement.Exec(time.Now().In(usr.Location).Format("2006-01-02 15:04:05"), userID)
 	if err != nil {
 

@@ -75,7 +75,7 @@ func (au *AuthUseCase) AuthenticateByEmail(ctx context.Context, loginReq EmailLo
 	}
 	// password hasher : Bcrypt
 	//salt is a plain test
-	fmt.Println("user ready")
+
 	err = bcrypt.CompareHashAndPassword([]byte(user.HashedPassword), []byte(loginReq.Password+user.Salt))
 
 	if err != nil {
@@ -85,7 +85,6 @@ func (au *AuthUseCase) AuthenticateByEmail(ctx context.Context, loginReq EmailLo
 		err = au.throwPasswordError(ctx)
 		return
 	}
-	fmt.Println("pass correct")
 
 	// Set JWT claims
 	jwt := entities.JWTClaims{}

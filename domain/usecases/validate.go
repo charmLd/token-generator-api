@@ -26,7 +26,6 @@ func (au *AuthUseCase) GenerateToken(ctx context.Context, userId string) (token 
 
 	randomStringValue := RandStringRunes(3) + RandStringRunes(4) + RandStringRunes(3)
 	newToken := entities.TokenGenRequest{}
-
 	//generate jwt token
 	token, err = au.TokenAdapter.GenerateUniqueToken(ctx, newToken)
 
@@ -62,7 +61,7 @@ func (au *AuthUseCase) Validate(ctx context.Context, validateReq entities.Valida
 
 		return
 	}
-	fmt.Println("user : ", JwtPayloadData.UserID)
+
 	//go func to update the user login
 	defer func() {
 		err = au.UserRepository.UpdateLastLogin(ctx, fmt.Sprint(JwtPayloadData.UserID))

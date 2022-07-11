@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/charmLd/token-generator-api/domain/boundary/adapters"
 	"github.com/charmLd/token-generator-api/domain/entities"
 	error2 "github.com/charmLd/token-generator-api/domain/error"
 	"github.com/charmLd/token-generator-api/util/config"
@@ -19,7 +20,7 @@ type tokenAdapter struct {
 	Cfg config.TokenConfig
 }
 
-func NewTokenAdapter(cfg config.TokenConfig) *tokenAdapter {
+func NewTokenAdapter(cfg config.TokenConfig) adapters.TokenAdapterInterface {
 
 	return &tokenAdapter{
 		Cfg: cfg,
@@ -89,7 +90,6 @@ func (ta *tokenAdapter) GenerateLoginToken(ctx context.Context, jwtClaims entiti
 func (ta *tokenAdapter) ValidateLoginJWToken(ctx context.Context, token string) (jwtClaims *entities.JWTClaims, err error) {
 
 	jwtClaims = &entities.JWTClaims{}
-	fmt.Println(ta.Cfg.LoginSecretKey, " key")
 
 	tokenStr, err := jwt.ParseWithClaims(token, jwtClaims, func(t *jwt.Token) (interface{}, error) {
 		return []byte(ta.Cfg.LoginSecretKey), nil

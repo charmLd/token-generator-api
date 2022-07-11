@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/charmLd/token-generator-api/domain/boundary/repositories"
 
 	"time"
 
@@ -18,7 +19,7 @@ type TokenRepository struct {
 	Location    *time.Location
 }
 
-func NewTokenRepository(dbAdapter adapters.DBAdapterInterface, loc *time.Location) *TokenRepository {
+func NewTokenRepository(dbAdapter adapters.DBAdapterInterface, loc *time.Location) repositories.TokenRepositoryInterface {
 
 	return &TokenRepository{
 		DBAdapter: dbAdapter,
