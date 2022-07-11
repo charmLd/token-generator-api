@@ -2,7 +2,7 @@ package controllers
 
 import (
 	"errors"
-	"github.com/charmLd/token-generator-api/domain/usecases"
+	"github.com/charmLd/token-generator-api/domain/entities"
 	"github.com/charmLd/token-generator-api/http/error"
 	"github.com/charmLd/token-generator-api/http/error/types"
 	"github.com/charmLd/token-generator-api/http/transport/request"
@@ -16,8 +16,9 @@ import (
 
 func (ctl *BaseController) PublicTokenValidateCOntrollerFunc(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	defer r.Body.Close()
-
+	if r.Body != nil {
+		defer r.Body.Close()
+	}
 	token := r.Header.Get("Authorization")
 	if token == "" {
 		error.Handle(r.Context(), (&types.ForbiddenError{}).New("authentication header invalid"), w)
@@ -29,7 +30,6 @@ func (ctl *BaseController) PublicTokenValidateCOntrollerFunc(w http.ResponseWrit
 		return
 	}
 	token = strings.TrimSpace(splitToken[1])
-
 	validateRequest := unpackers.ValidateRequest{}
 	err := request.Unpack(r, &validateRequest)
 	if err != nil {
@@ -44,7 +44,7 @@ func (ctl *BaseController) PublicTokenValidateCOntrollerFunc(w http.ResponseWrit
 		return
 	}
 
-	validateUseCaseRequest := usecases.ValidateRequest{AuthToken: validateRequest.Jwt}
+	validateUseCaseRequest := entities.ValidateRequest{InviteToken: validateRequest.InviteToken, UserId: validateRequest.UserId}
 	valid, err := ctl.AuthUseCase.Validate(ctx, validateUseCaseRequest, token)
 	if err != nil {
 		error.Handle(ctx, err, w)
@@ -53,7 +53,7 @@ func (ctl *BaseController) PublicTokenValidateCOntrollerFunc(w http.ResponseWrit
 
 	if !valid {
 		//send the appropriate error
-		error.Handle(ctx, errors.New("invalid token"), w)
+		error.Handle(ctx, errors.New(" invalid token"), w)
 		return
 	}
 

@@ -2,4 +2,6 @@
 host : "0.0.0.0"
 internal-port : 8080
 public-port : 10443
+
+# Need to have same Timezone in the system and MySQL server
 timezone : "UTC"

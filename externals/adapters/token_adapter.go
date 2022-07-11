@@ -2,17 +2,17 @@ package adapters
 
 import (
 	"context"
-	"strings"
+	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/dgrijalva/jwt-go"
 	"github.com/charmLd/token-generator-api/domain/entities"
 	error2 "github.com/charmLd/token-generator-api/domain/error"
 	"github.com/charmLd/token-generator-api/util/config"
+	"github.com/dgrijalva/jwt-go"
 	log "github.com/sirupsen/logrus"
+	"strings"
 	"time"
-	"encoding/base64"
-	"encoding/json"
 )
 
 type tokenAdapter struct {
@@ -25,6 +25,8 @@ func NewTokenAdapter(cfg config.TokenConfig) *tokenAdapter {
 		Cfg: cfg,
 	}
 }
+
+//todo For future improvements
 func (ta *tokenAdapter) GenerateUniqueToken(ctx context.Context, jwtClaims entities.TokenGenRequest) (jwToken string, err error) {
 
 	var alg *jwt.SigningMethodHMAC
@@ -92,7 +94,7 @@ func (ta *tokenAdapter) ValidateLoginJWToken(ctx context.Context, token string) 
 	tokenStr, err := jwt.ParseWithClaims(token, jwtClaims, func(t *jwt.Token) (interface{}, error) {
 		return []byte(ta.Cfg.LoginSecretKey), nil
 	})
-	fmt.Println(tokenStr, " 1 ", err)
+
 	if err != nil {
 		if err == jwt.ErrSignatureInvalid {
 			log.Error(ctx, err, "parse with claims failed")
@@ -103,18 +105,16 @@ func (ta *tokenAdapter) ValidateLoginJWToken(ctx context.Context, token string) 
 		log.Error(ctx, err, "parse with claims failed")
 		return
 	}
-	fmt.Println(tokenStr, " 2 ", err)
+
 	if !tokenStr.Valid {
 		log.Debug(ctx, "invalid token", jwtClaims.UserID)
 		return jwtClaims, error2.UnauthorizedTokenError{}
 	}
-	fmt.Println(tokenStr, " 3 ", err)
+
 	if time.Now().After(time.Unix(jwtClaims.ExpireAt, 0)) {
 		log.Debug(ctx, "expired token", jwtClaims.UserID)
 		return jwtClaims, error2.ExpiredTokenError{}
 	}
-	fmt.Println(tokenStr, " 4 ", err)
-	fmt.Println("token validation is successful", jwtClaims.UserID)
 	log.Trace(ctx, "token validation is successful", jwtClaims.UserID)
 	return jwtClaims, nil
 }

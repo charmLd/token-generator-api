@@ -88,6 +88,7 @@ func (srv *HTTPServer) Init() chan error {
 
 }
 
+//todo check this
 // ShutDown releases all http connections gracefully and shut down the server
 func (srv *HTTPServer) ShutDown(ctx context.Context) {
 

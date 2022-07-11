@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -62,65 +61,20 @@ func (a *AuthenticationMiddleware) Middleware(next http.Handler) http.Handler {
 			return
 		}
 		token = strings.TrimSpace(splitToken[1])
-		fmt.Println("toekn:", token)
 
 		JwtPayloadData, err := a.Container.Adapters.Token.DecodeAuthToken(r.Context(), token)
-		fmt.Println(JwtPayloadData, "  ", err)
-		//JwtPayloadData, err := DecodeJwtPayload(r.Context(), token)
-		//fmt.Println("JWT Payload Data :", JwtPayloadData)
 
 		if err != nil {
 			log.Error(r.Context(), "access header Bearer JWT token error : ", err)
 			e.Handle(r.Context(), (&types.UnAuthorizeError{}).New("access header Bearer JWT token error"), w)
 			return
 		}
-		if JwtPayloadData.UserRole != "admin" {
+		if JwtPayloadData.UserRole != "admin" { //Only admin users can do admin functionalities
 			log.Error(r.Context(), "unauthorized user  ", err)
 			e.Handle(r.Context(), (&types.UnAuthorizeError{}).New("unauthorized user"), w)
 			return
 		}
-		/*
-		   check if the token has necessary roles to do the admin functionalities
 
-		   //role - admin can call all endpoints - here only cosider admin role
-		*/
-
-		//validate the authorization token to authenticate the user or client
-		/* isValid, err := a.Auth.ValidateAuthToken(r.Context(), token)
-		if err != nil {
-			log.Error(r.Context(), "JWT token validate error : ", err)
-			e.Handle(r.Context(), (&types.UnAuthorizeError{}).New("JWT token validate error"), w)
-			return
-
-		}
-
-		if !isValid {
-			log.Error(r.Context(), "", "JWT token unauthorized : ")
-			e.Handle(r.Context(), (&types.UnAuthorizeError{}).New("JWT token unauthorized : "), w)
-			return
-		} */
-		//check if the client has the necessary permissions to do the admin functionalities unless return authentication error
-		fmt.Println(JwtPayloadData)
 		next.ServeHTTP(w, r)
 	})
 }
-
-/* func DecodeJwtPayload(ctx context.Context, jwt string) (payload entities.JWTClaims, err error) {
-	jwtSplit := strings.Split(jwt, ".")
-	if len(jwtSplit) != 3 {
-		log.Error(ctx, "Jwt Token Format Error :", jwt, err)
-		return payload, err
-	}
-	data, err := base64.StdEncoding.WithPadding(base64.NoPadding).DecodeString(jwtSplit[1])
-	if err != nil {
-		log.Error(ctx, "Jwt base 64 decode error :", string(data), err)
-		return payload, err
-	}
-	err = json.Unmarshal(data, &payload)
-	if err != nil {
-		log.Error(ctx, "Unmarshal Auth Token Error :", data, err)
-		return payload, err
-	}
-	return payload, nil
-}
-*/

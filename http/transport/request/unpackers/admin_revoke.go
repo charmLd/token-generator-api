@@ -1,13 +1,13 @@
 package unpackers
 
 type AdminRevokeUnpackers struct {
-	InviteToken string `json:"invite_token" `
+	UserId string `json:"user_id" `
 }
 
 func (*AdminRevokeUnpackers) RequiredFormat() string {
 
 	return `
 	{
-      	"invite_token":<string>,
+		"user_id":<string>,
 	}`
 }

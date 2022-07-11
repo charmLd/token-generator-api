@@ -39,6 +39,7 @@ type AuthUseCase struct {
 type AuthConfig struct {
 	LoginTokenExpiry     int
 	GeneratedTokenExpiry int
+	Location             *time.Location
 }
 
 type EmailLoginRequest struct {
@@ -49,8 +50,12 @@ type EmailLoginRequest struct {
 // Authenticate authenticates a user
 func (au *AuthUseCase) AuthenticateByEmail(ctx context.Context, loginReq EmailLoginRequest) (tokenRes entities.Token, err error) {
 	//Testing
-	/*passHas,_:=au.generateHashPassword(ctx,"Test@123AbC")
-	fmt.Println("Pass:",passHas)*/
+	//admin user
+	//passHas,_:=au.generateHashPassword(ctx,"Test@123AbC")
+	//fmt.Println("Pass:",passHas)
+
+	//passHas, _ := au.generateHashPassword(ctx, "Abc@123cAb")
+	//fmt.Println("Pass:", passHas)
 	// Fetch user information
 	user, err := au.UserRepository.GetUserByEmail(ctx, loginReq.Email)
 
@@ -81,53 +86,7 @@ func (au *AuthUseCase) AuthenticateByEmail(ctx context.Context, loginReq EmailLo
 		return
 	}
 	fmt.Println("pass correct")
-	//todo if user login are exceeded its concurrent limit to access the web app it should remove  tokens as concurrent login increaese
 
-	/*
-
-		// If multiple login is not allowed for appId, revoke the other token and issue a new token.
-		if app.ConcurrentLoginLimit == 1 {
-			// Revoke all other tokens
-			err = au.RevokeApp(ctx, user.UserID, app.AppID)
-			if err != nil {
-				log.Error(ctx, fmt.Sprintf("user authentication failed for %v", user.UserID))
-				return
-			}
-			log.DebugContext(ctx, fmt.Sprintf("revoked the existing token as concurrent login limit is 1 for %v", loginReq.AppName))
-		} else if app.ConcurrentLoginLimit > 1 {
-			// Get tokens issued for the same app
-			var tokens []entities.Token
-			tokens, err = au.TokenRepository.GetIssuedTokens(ctx, user.UserID, app.AppID)
-			if err != nil {
-				log.Error(ctx, fmt.Sprintf("user authentication failed for %v", user.UserID))
-				return
-			}
-
-			// If multiple login is allowed, but concurrent_login_limit has not been exceeded, issue a new token.
-			if app.ConcurrentLoginLimit <= len(tokens) {
-				//revoking the oldest token
-				//no validation required for the array since len(tokens) >= concurrentLimit > 1
-				oldestToken := tokens[0]
-				for _, token := range tokens {
-					// oldest token needs to be to_be_revoked=0 since unless the concurrent limit will be exceeded
-					if token.CreatedAt.Unix() < oldestToken.CreatedAt.Unix() && !token.ToBeRevoked {
-						oldestToken = token
-					}
-				}
-
-				err = au.Revoke(ctx, oldestToken.ID, user.UserID)
-				if err != nil {
-					log.Error(ctx, fmt.Sprintf("revoking oldest token failed for %v", oldestToken.ID), fmt.Sprintf("user authentication failed for %v", user.UserID))
-					return
-				}
-				log.DebugContext(ctx, fmt.Sprintf("oldest token which was created at %v was revoked for the user %v", oldestToken.CreatedAt, user.UserID))
-			}
-		} else {
-			log.Error(ctx, fmt.Sprintf("concurrent login limit for app %v is 0 or invalid", app.AppID), fmt.Sprintf("user authentication failed for %v", user.UserID))
-			err = au.throwConcurrentLoginLimitError(ctx)
-			return
-		}
-	*/
 	// Set JWT claims
 	jwt := entities.JWTClaims{}
 	jwt.UserID = user.UserID
@@ -151,7 +110,7 @@ func (au *AuthUseCase) AuthenticateByEmail(ctx context.Context, loginReq EmailLo
 	}
 
 	// Generate token entity
-	tokenRes.ID = jwt.TokenID
+	tokenRes.Token = jwt.TokenID
 
 	tokenRes.GeneratedToken = authToken
 
@@ -165,29 +124,13 @@ func (au *AuthUseCase) AuthenticateByEmail(ctx context.Context, loginReq EmailLo
 		return
 	}
 
-	log.Trace(ctx, fmt.Sprintf("user authentication is successful for user_id %v and token_id %v", user.UserID, tokenRes.ID))
+	log.Trace(ctx, fmt.Sprintf("user authentication is successful for user_id %v and token_id %v", user.UserID, tokenRes.Token))
 	return
 
 }
 
-func (au *AuthUseCase) throwPasswordError(ctx context.Context) error {
-	return (&appErr.Error{}).New(ctx, appErr.DOMAIN, "incorrect password",
-		"CORE-2004",
-		"incorrect password")
-}
-
-func (au *AuthUseCase) throwUserNotExistError(ctx context.Context) error {
-	return (&appErr.Error{}).New(ctx, appErr.DOMAIN, "invalid user",
-		"CORE-2006",
-		"invalid user")
-}
-
-func (au *AuthUseCase) throwTokenIssueError(ctx context.Context) error {
-	return (&appErr.Error{}).New(ctx, appErr.DOMAIN, "token Issue Error",
-		"CORE-2012",
-		"could not issue a token")
-}
-
+/*
+//generateHashPassword create user passwords
 func (*AuthUseCase) generateHashPassword(ctx context.Context, pass string) (passHash string, err error) {
 	// Transform password to hash
 	passHashBytes, err := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
@@ -198,3 +141,4 @@ func (*AuthUseCase) generateHashPassword(ctx context.Context, pass string) (pass
 	passHash = string(passHashBytes)
 	return
 }
+*/

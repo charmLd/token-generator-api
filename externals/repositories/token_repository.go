@@ -27,14 +27,14 @@ func NewTokenRepository(dbAdapter adapters.DBAdapterInterface, loc *time.Locatio
 }
 
 // Revoke invalidated a token
-func (tr *TokenRepository) Revoke(ctx context.Context, tokenID string) (err error) {
+func (tr *TokenRepository) Revoke(ctx context.Context, userId string) (err error) {
 
 	tr.transaction, err = tr.DBAdapter.BeginTransaction(ctx)
 	if err != nil {
 		log.Error(ctx, err, "begin transaction failed for revoke query")
 		return
 	}
-	row, err := tr.revokeToken(ctx, tokenID)
+	row, err := tr.revokeToken(ctx, userId)
 	if err != nil {
 		log.Error(ctx, "revoking query failed")
 		return
@@ -44,7 +44,7 @@ func (tr *TokenRepository) Revoke(ctx context.Context, tokenID string) (err erro
 		log.Error(ctx, err, "committing revoke query failed")
 		return
 	}
-	log.Debug(ctx, fmt.Sprintf("user : %v, revoked, rows affected : %v", tokenID, row))
+	log.Debug(ctx, fmt.Sprintf("user : %v, revoked, rows affected : %v", userId, row))
 	return
 }
 
@@ -75,7 +75,7 @@ func (tr *TokenRepository) insertToken(ctx context.Context, token entities.Token
 	query := `
 		INSERT INTO generated_tokens
 		(gen_token_id,user_id,token,created_at,expiry,is_blacklisted)
-		VALUES(UUID_TO_BIN(?),?, ?, ?, ?, ?);
+		VALUES(?,?, ?, ?, ?, ?);
 	`
 
 	statement, err := tr.transaction.Prepare(query)
@@ -92,7 +92,7 @@ func (tr *TokenRepository) insertToken(ctx context.Context, token entities.Token
 	}
 
 	_, err = statement.Exec(
-		token.ID,
+		token.Token,
 		token.UserId,
 		token.GeneratedToken,
 		token.CreatedAt.In(tr.Location).Format("2006-01-02 15:04:05"),
@@ -111,12 +111,12 @@ func (tr *TokenRepository) insertToken(ctx context.Context, token entities.Token
 	return
 }
 
-func (tr *TokenRepository) revokeToken(ctx context.Context, tokenID string) (tokensRevoked int, err error) {
+func (tr *TokenRepository) revokeToken(ctx context.Context, userId string) (tokensRevoked int, err error) {
 
 	query := `
 		UPDATE generated_tokens
 		SET is_blacklisted=?
-		WHERE gen_token_id = UUID_TO_BIN(?);
+		WHERE user_id = ?;
 	`
 
 	statement, err := tr.transaction.Prepare(query)
@@ -128,11 +128,11 @@ func (tr *TokenRepository) revokeToken(ctx context.Context, tokenID string) (tok
 		return
 	}
 
-	if tokenID == "" {
-		log.Error(ctx, "no token id provided")
-		return 0, errors.New("token ID is invalid :" + tokenID)
+	if userId == "" {
+		log.Error(ctx, "no user id provided")
+		return 0, errors.New("user ID is invalid :" + userId)
 	}
-	result, err := statement.Exec(1, tokenID)
+	result, err := statement.Exec(1, userId)
 	if err != nil {
 		errRollback := tr.transaction.Rollback()
 		if errRollback != nil {
@@ -164,13 +164,13 @@ func (t *TokenRepository) GetAllTokenForFilter(ctx context.Context, fetchDetails
 	if fetchDetailsFilters.Balcklisted.IsOK && fetchDetailsFilters.Balcklisted.Value != "" {
 
 		userQuery = `
-		SELECT user_id,token,created_at,expiry,is_blacklisted
+		SELECT gen_token_id,user_id,token,created_at,expiry,is_blacklisted
 		FROM generated_tokens WHERE is_blacklisted=` + fetchDetailsFilters.Balcklisted.Value + ` AND user_id=
 		 ` + fetchDetailsFilters.UserId + ` ORDER BY user_id DESC  ;
 `
 	} else {
 		userQuery = `
-		SELECT user_id,token,created_at,expiry,is_blacklested
+		SELECT gen_token_id,user_id,token,created_at,expiry,is_blacklisted
 		FROM generated_tokens WHERE user_id=
 		 ` + fetchDetailsFilters.UserId + ` ORDER BY user_id DESC  ;
 `
@@ -200,6 +200,7 @@ func (t *TokenRepository) GetAllTokenForFilter(ctx context.Context, fetchDetails
 		tokendetail := entities.Token{}
 
 		err = rows.Scan(
+			&tokendetail.Token,
 			&tokendetail.UserId,
 			&tokendetail.GeneratedToken,
 			&tokendetail.CreatedAt,
@@ -261,7 +262,7 @@ func (tr *TokenRepository) addToken(ctx context.Context, token entities.Token) (
 	}
 
 	_, err = statement.Exec(
-		token.ID,
+		token.Token,
 		token.UserId,
 
 		token.IsBlacklisted,
@@ -278,4 +279,54 @@ func (tr *TokenRepository) addToken(ctx context.Context, token entities.Token) (
 	}
 
 	return
+}
+func (t *TokenRepository) FetchTokenInfo(ctx context.Context, tokenDetails entities.ValidateRequest) (tokendetail entities.Token, err error) {
+
+	var userQuery string
+
+	userQuery = `
+		SELECT user_id,token,created_at,expiry,is_blacklisted
+		FROM generated_tokens WHERE user_id=? AND  gen_token_id =? ;
+`
+
+	statement, err := t.DBAdapter.Prepare(ctx, userQuery)
+	if statement != nil {
+		defer statement.Close()
+	}
+	if err != nil {
+
+		log.Error(ctx, "", err, fmt.Sprintf("preparing query to fetch app login failed"))
+		return
+	}
+
+	rows, err := statement.Query(tokenDetails.UserId, tokenDetails.InviteToken)
+	if rows != nil {
+		defer rows.Close()
+	}
+	if err != nil {
+
+		log.Error(ctx, "", err, fmt.Sprintf("executing get app login query failed "))
+		return
+	}
+
+	for rows.Next() {
+
+		err = rows.Scan(
+			&tokendetail.UserId,
+			&tokendetail.GeneratedToken,
+			&tokendetail.CreatedAt,
+			&tokendetail.Expiry,
+			&tokendetail.IsBlacklisted,
+		)
+
+		if err != nil {
+
+			log.Error(ctx, "", err, fmt.Sprintf("reading results failed "))
+			return
+		}
+		break
+	}
+
+	fmt.Println(ctx, " ", "fetch token details is successful")
+	return tokendetail, nil
 }

@@ -8,6 +8,9 @@ API documentation can be found in `./doc/api/openapi.yaml`.
 
 Use [Swagger Editor](https://editor.swagger.io/) to view the file.
 
+## Database Script
+This use a mysql database and the script can be found in `./database-script/auth_db.sql` .
+
 ## Code Quality Check
 
 `SonarQube` is used for checking code quality. Much of the needed sonarqube configurations

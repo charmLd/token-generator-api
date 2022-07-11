@@ -26,7 +26,6 @@ func resolveDBAdapter(cfg config.DBConfig) {
 
 //Resolve JWT adapter
 func resolveTokenAdapter(cfg config.TokenConfig) {
-	//tokenAdapter := adapters.NewTokenAdapter(cfg)
 	tokenAdapter := adapters.NewTokenAdapter(cfg)
 	resolvedAdapters.Token = tokenAdapter
 }

@@ -7,12 +7,12 @@ const (
 )
 
 type Token struct {
-	ID             string
-	UserId         string
-	IsBlacklisted  bool
-	GeneratedToken string
-	CreatedAt      time.Time
-	Expiry         time.Time
+	Token          string    `json:"invite_token"`
+	UserId         string    `json:"user_id"`
+	IsBlacklisted  bool      `json:"is_blacklisted"`
+	GeneratedToken string    `json:"jwt_token"`
+	CreatedAt      time.Time `json:"created_at"`
+	Expiry         time.Time `json:"expiry_at"`
 }
 
 type JWTClaims struct {
@@ -34,6 +34,10 @@ type TokenDetailsReqParam struct {
 	UserId      string
 }
 
+type ValidateRequest struct {
+	InviteToken string
+	UserId      string
+}
 type TokenParams struct {
 	IsOK  bool
 	Value string

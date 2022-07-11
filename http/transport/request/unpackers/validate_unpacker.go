@@ -1,12 +1,14 @@
 package unpackers
 
 type ValidateRequest struct {
-	Jwt string `json:"jwt" validate:"required"`
+	UserId      string `json:"user_id" validate:"required"`
+	InviteToken string `json:"invite_token" validate:"required"`
 }
 
 func (*ValidateRequest) RequiredFormat() string {
 	return `
 	{
-		"status": "SUCCESS”
+		"user_id": "string",
+		"invite_token": "string",
 	}`
 }

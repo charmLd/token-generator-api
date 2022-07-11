@@ -68,7 +68,7 @@ func (ctl *BaseController) AdminTokenRevokeControllerFun(w http.ResponseWriter, 
 		return
 	}
 
-	err = ctl.AuthUseCase.AdminRevokeToken(ctx, adminRevokeUnpacker.InviteToken)
+	err = ctl.AuthUseCase.AdminRevokeToken(ctx, adminRevokeUnpacker.UserId)
 	if err != nil {
 		error.Handle(ctx, err, w)
 		return

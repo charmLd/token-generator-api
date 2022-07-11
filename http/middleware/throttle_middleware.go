@@ -54,18 +54,10 @@ func (tm *ThrottleMiddleware) Middleware(next http.Handler) http.Handler {
 			e.Handle(r.Context(), (&types.UnAuthorizeError{}).New("unauthorized activity"), w)
 			return
 		}
-		fmt.Println("last login time : ", lastlogintime.In(tm.Container.Location).Unix())
-		fmt.Println("now time : ", time.Now().In(tm.Container.Location).Unix())
-		fmt.Println("since :", time.Since(lastlogintime))
 
-		fmt.Println("since :", time.Now().In(tm.Container.Location).Sub(lastlogintime.In(tm.Container.Location)))
-		fmt.Println("time sub :", time.Now().Unix()-lastlogintime.Unix())
-		fmt.Println("last login time : ", lastlogintime)
-		fmt.Println("time :", time.Now().In(tm.Container.Location))
-		fmt.Println("since 2 :", time.Now().In(tm.Container.Location).Sub(lastlogintime))
-		fmt.Println("NOWWWWWWW: ", time.Now().In(tm.Container.Location).Format("2006-01-02 15:04:05"))
+		fmt.Println("diff time : ", time.Since(lastlogintime))
 
-		if time.Since(lastlogintime) < time.Duration(tm.Container.ThrottledTime)*time.Minute {
+		if time.Since(lastlogintime) < time.Duration(tm.Container.ThrottledTime)*time.Minute { //it will not allow the user to do valid requests until the throttled time period if over
 			//check the time tifference between last login times and
 			//if it exceed return error
 			e.Handle(r.Context(), (&types.UnAuthorizeError{}).New("exceed the request rate for the client | Throttled"), w)

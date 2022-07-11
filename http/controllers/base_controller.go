@@ -17,11 +17,11 @@ func NewBaseController(container *container.Container) *BaseController {
 
 	authUseCase := usecases.AuthUseCase{
 		Config: usecases.AuthConfig{
-			//RTExpiry: container.Configs.TokenConfig.RTExpiry * 60 * 60 * 24, //converting days into seconds
+
 			LoginTokenExpiry:     container.Configs.TokenConfig.LoginTokenExpiry * 60 * 60 * 24, //converting days into seconds
 			GeneratedTokenExpiry: container.Configs.TokenConfig.TokenExpiry * 60 * 60 * 24,      //converting days into seconds
 
-			//GracePeriod: container.Configs.TokenConfig.GracePeriod,
+			Location: container.Location,
 		},
 
 		TokenAdapter:    container.Adapters.Token,
