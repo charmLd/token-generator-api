@@ -1,0 +1,127 @@
+openapi: 3.0.0
+info:
+  title: Token_Generator_API
+  version: 1.0.0
+servers:
+  - url: http://0.0.0.0:8080
+  - url: https://0.0.0.0:10443
+paths:
+  /auth/login:
+    post:
+      tags:
+        - default
+      summary: Login - for authenticated User chamika
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                email: chamika@gmail.com
+                password: Test@123
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /token/generate:
+    post:
+      tags:
+        - default
+      summary: Generate new invite token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                user_id: '1'
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: >-
+            Bearer
+            eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJ0b2tlbl9pZCI6ImNhMjVlYTZmLWE1MjgtNDJkYi04OTg2LWNhMmEyMjE4ZmIzMSIsInVzZXJfcm9sZSI6ImFkbWluIiwiaWF0IjoxNjU3NDY1NzM3LCJleHAiOjE2NTgwNzA1Mzd9.M1RmNN4u24H2WMGTE8k8v-_QG8pzc19Cjb2vAS0WnB0
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /token/revoke:
+    post:
+      tags:
+        - default
+      summary: revoke invite tokens  - blacklist
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                invite_token: >-
+                  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbiI6IjhlZTIwNTg2LWJhZDktNDM5Ny1iNTY5LTc4MmY2NTcyYmNmZCIsImlhdCI6MTY1NzQ3MTU2OSwiZXhwIjoxNjU4MDc2MzY5LCJpc19ibGFja2xpc3RlZCI6ZmFsc2V9.PP74JgBwKyIpXQGF_Od4KAyX9o9HwXhkqZVhVTlxKqk
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: >-
+            Bearer
+            eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJ0b2tlbl9pZCI6ImNhMjVlYTZmLWE1MjgtNDJkYi04OTg2LWNhMmEyMjE4ZmIzMSIsInVzZXJfcm9sZSI6ImFkbWluIiwiaWF0IjoxNjU3NDY1NzM3LCJleHAiOjE2NTgwNzA1Mzd9.M1RmNN4u24H2WMGTE8k8v-_QG8pzc19Cjb2vAS0WnB0
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /user/1/token/fetch:
+    get:
+      tags:
+        - default
+      summary: Fetch generated invite tokens - not blacklisted
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: >-
+            Bearer
+            eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJ0b2tlbl9pZCI6ImNhMjVlYTZmLWE1MjgtNDJkYi04OTg2LWNhMmEyMjE4ZmIzMSIsInVzZXJfcm9sZSI6ImFkbWluIiwiaWF0IjoxNjU3NDY1NzM3LCJleHAiOjE2NTgwNzA1Mzd9.M1RmNN4u24H2WMGTE8k8v-_QG8pzc19Cjb2vAS0WnB0
+        - name: blacklisted
+          in: query
+          schema:
+            type: boolean
+          example: 'false'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /auth/validate:
+    post:
+      tags:
+        - default
+      summary: invite token validate - public endpoint
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                jwt: >-
+                  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbiI6IjFYVmwiLCJpYXQiOjE2NTc0Njg3MDUsImV4cCI6MTY1ODA3MzUwNSwiaXNfYmxhY2tsaXN0ZWQiOmZhbHNlfQ.csbInX-NpCqf_prndDHy2gmWIGDwPR1MsiyJ_7A1vRI
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: >-
+            Bearer
+            eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJ0b2tlbl9pZCI6ImNhMjVlYTZmLWE1MjgtNDJkYi04OTg2LWNhMmEyMjE4ZmIzMSIsInVzZXJfcm9sZSI6ImFkbWluIiwiaWF0IjoxNjU3NDY1NzM3LCJleHAiOjE2NTgwNzA1Mzd9.M1RmNN4u24H2WMGTE8k8v-_QG8pzc19Cjb2vAS0WnB0
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+

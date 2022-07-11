@@ -1,0 +1,5 @@
+
+host : "0.0.0.0"
+internal-port : 8080
+public-port : 10443
+timezone : "UTC"
