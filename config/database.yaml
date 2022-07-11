@@ -1,0 +1,9 @@
+
+host : "127.0.0.1"
+port : 3306
+database : test
+user : chamika
+password : password
+max_idle_connection : 100
+max_open_connection : 10
+

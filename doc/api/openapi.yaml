@@ -1,0 +1,129 @@
+openapi: 3.0.0
+info:
+  title: Token_Generator_API
+  version: 1.0.0
+servers:
+  - url: http://0.0.0.0:8080
+  - url: https://0.0.0.0:10443
+paths:
+  /auth/login:
+    post:
+      tags:
+        - default
+      summary: Login - for authenticated client user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                email: testclient@gmail.com
+                password: Abc@123
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /token/generate:
+    post:
+      tags:
+        - default
+      summary: Generate new invite token - non admin user - ERROR
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                user_id: '2'
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: number
+          description: jwt token of non admin user will create errors
+          example: >-
+            Bearer
+            eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJ0b2tlbl9pZCI6Ijg0ZGIyNGUzLWE1ZDEtNGRjMi1hODYwLTc3NGM2Y2MxM2YzMSIsInVzZXJfcm9sZSI6InVzZXIiLCJpYXQiOjE2NTc1NjExNzAsImV4cCI6MTY1NzY0NzU3MH0.04hdcesP17qq6Ow-9c174pMNAtes-y35jIUubpbEfDQ
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /token/revoke:
+    post:
+      tags:
+        - default
+      summary: revoke invite tokens  - blacklist - by admin user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                user_id: '2'
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          description: jwt token of admin user
+          example: >-
+            Bearer
+            eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJ0b2tlbl9pZCI6ImNhMjVlYTZmLWE1MjgtNDJkYi04OTg2LWNhMmEyMjE4ZmIzMSIsInVzZXJfcm9sZSI6ImFkbWluIiwiaWF0IjoxNjU3NDY1NzM3LCJleHAiOjE2NTgwNzA1Mzd9.M1RmNN4u24H2WMGTE8k8v-_QG8pzc19Cjb2vAS0WnB0
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /user/2/token/fetch:
+    get:
+      tags:
+        - default
+      summary: Fetch generated invite tokens - not blacklisted
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: number
+          description: jwt token of admin user
+          example: >-
+            Bearer
+            eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJ0b2tlbl9pZCI6IjA3YWNiYzAwLTgzMmQtNDI2Yy04ZDJhLTE1OTI1Yzk1YzM1MyIsInVzZXJfcm9sZSI6ImFkbWluIiwiaWF0IjoxNjU3NTU2NDAxLCJleHAiOjE2NTc2NDI4MDF9.1N6EJfIAikPEZtQNkO6eZXAcETWe4vkqewDy5oK7N0U
+        - name: blacklisted
+          in: query
+          schema:
+            type: boolean
+          example: 'false'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /auth/validate:
+    post:
+      tags:
+        - default
+      summary: invite token validate - public endpoint
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                user_id: '2'
+                invite_token: WodTB2rJ8S
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          description: jwt token of admin or non admin user
+          example: >-
+            Bearer
+            eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJ0b2tlbl9pZCI6IjFkYjI3YjVjLTI1MWEtNDVkNS1hNjQxLWVkMDE5NTBmYmRjNSIsInVzZXJfcm9sZSI6ImFkbWluIiwiaWF0IjoxNjU3NTU0ODEzLCJleHAiOjE2NTc2NDEyMTN9.wnH-tgthy1y-QGd3jWubObRrQWzNO7zsSm6ZmH1fKE0
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}

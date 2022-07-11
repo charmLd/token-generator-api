@@ -1,0 +1,7 @@
+Disclaimer!
+"configurations"
+
+**This folder consists of sensitive  data ; secret keys and SSL certificates
+**Never expose those configs to public and don't maintain these configs in the repo
+
+**This is only for testing purposes **

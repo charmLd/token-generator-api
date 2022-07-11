@@ -1,0 +1,11 @@
+
+login-token-expiry: 1 #days
+login-secret-key : abc@123
+
+token-expiry: 7 #days
+token-secret-key: token@123
+
+hash-algorithm : HS256
+
+throttled-time : 1
+

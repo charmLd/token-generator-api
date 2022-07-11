@@ -1,0 +1,36 @@
+package controllers
+
+import (
+	"github.com/charmLd/token-generator-api/domain/usecases"
+
+	"github.com/charmLd/token-generator-api/util/container"
+)
+
+// BaseController contains controller logic for endpoints
+type BaseController struct {
+	Container   *container.Container
+	AuthUseCase usecases.AuthUseCase
+}
+
+// NewBaseController returns a base type for this controller
+func NewBaseController(container *container.Container) *BaseController {
+
+	authUseCase := usecases.AuthUseCase{
+		Config: usecases.AuthConfig{
+
+			LoginTokenExpiry:     container.Configs.TokenConfig.LoginTokenExpiry * 60 * 60 * 24, //converting days into seconds
+			GeneratedTokenExpiry: container.Configs.TokenConfig.TokenExpiry * 60 * 60 * 24,      //converting days into seconds
+
+			Location: container.Location,
+		},
+
+		TokenAdapter:    container.Adapters.Token,
+		TokenRepository: container.Repositories.TokenRepository,
+		UserRepository:  container.Repositories.UserRepository,
+	}
+
+	return &BaseController{
+		Container:   container,
+		AuthUseCase: authUseCase,
+	}
+}
